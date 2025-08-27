@@ -7,3 +7,6 @@ langgraph
 langchain-chroma
 langchain-mcp-adapters
 mcp
+browser-use
+playwright 
+httpx
