@@ -163,4 +163,30 @@ class Nodes:
             raise CustomException(e, sys) from e
         
 
-    
+    async def CombinedNode(state: AssistantState)->dict:
+        """Give a better result from the combination of the vector data and tool data"""
+        logging.info("Combined Node................")
+        try:
+            query = state['messages'][-1].content if state['messages'] else ""
+            vector_resp = state['vector_response'][-1] if state['vector_response'] else ""
+            tool_repo = state["research_response"][-1] if state['research_response'] else ""
+
+            prompt = PromptTemplate(
+                input_variables= ['query', "vector_respo", "research_respo"],
+                template= Prompts.combined_template
+            )
+            factory = LLMChainFactory(model_type= "gemini")
+            chain = await factory.get_llm_chain_async(prompt= prompt)
+            response = await chain.ainvoke({
+                "query": query,
+                "vector_respo": vector_resp,
+                "research_respo": tool_repo
+            })
+
+            return {
+                "messages": [AIMessage(content= response.content)]
+            }
+        except CustomException as e:
+            logging.error(f"Error in combdined node: {e}")
+            raise CustomException(e, sys) from e
+        
