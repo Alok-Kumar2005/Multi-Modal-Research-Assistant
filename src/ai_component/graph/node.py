@@ -16,53 +16,61 @@ from src.ai_component.exception import CustomException
 
 class Nodes:
     @staticmethod
-    async def QueryRefinerNode(state: AssistantState)->dict:
+    async def QueryRefinerNode(state: AssistantState) -> dict:
         """
         Refine the user query
         """
         logging.info("Query refiner node ...................")
         try:
             query = state['messages'][-1].content if state['messages'] else ""
+            if not query:
+                logging.warning("No query found in state messages")
+                return {
+                    "messages": [AIMessage(content="Error: No query provided to refine")]
+                }
+                
             prompt = PromptTemplate(
-                input_variables= ['user_query'],
-                template= Prompts.query_refiner_template
+                input_variables=['user_query'],
+                template=Prompts.query_refiner_template
             )
-            factory = LLMChainFactory(model_type= "groq")
-            chain = await factory.get_llm_chain_async(prompt = prompt)
+            factory = LLMChainFactory(model_type="groq")
+            chain = await factory.get_llm_chain_async(prompt=prompt)
             response = await chain.ainvoke({
                 "user_query": query
             })
             return {
-                "messages": [AIMessage(content = response.content)]
+                "messages": [AIMessage(content=response.content)]
             }
-        except CustomException as e:
+        except Exception as e:
             logging.error(f"Error in Query Refiner Node: {e}")
             raise CustomException(e, sys) from e
         
     @staticmethod
-    async def ResearchNode(state: AssistantState)->dict:
-        """Research on the Web,arxiv and take control of chrome """
-        logging.info("Reseach Node ..............")
+    async def ResearchNode(state: AssistantState) -> dict:
+        """Research on the Web, arxiv and take control of chrome"""
+        logging.info("Research Node ..............")
         try:
+            base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..', '..'))
+            
             client = MultiServerMCPClient(
                 {
                     "arXivPaper": {
                         "command": "uv",
                         "args": [
-                        "run",
-                        "--with",
-                        "arxiv-paper-mcp>=0.1.0",
-                        "arxiv-mcp"
+                            "run",
+                            "--with",
+                            "arxiv-paper-mcp>=0.1.0",
+                            "arxiv-mcp"
                         ]
                     },
                     "WebSearch": {
                         "command": "python",
-                        "args": ["src/ai_component/tools/mcp_tools/web_search_tool.py"],
+                        "args": [os.path.join(base_dir, "src", "ai_component", "tools", "mcp_tools", "web_search_tool.py")],
                         "transport": "stdio"
                     },
-                    "browser_agent":{
+                    "browser_agent": {
                         "command": "python",
-                        "args": ["src\ai_component\tools\mcp_tools\browser_use_tool.py"],
+                        "args": [os.path.join(base_dir, "src", "ai_component", "tools", "mcp_tools", "browser_use_tool.py")],
                         "transport": "stdio"
                     }
                 }
@@ -71,18 +79,41 @@ class Nodes:
             tools = await client.get_tools()
             factory = LLMChainFactory()
             llm = await factory.get_llm_async()
+            
             agent = create_react_agent(
-                llm , tools= tools,
-                prompt= Prompts.research_template
+                llm, 
+                tools=tools,
+                system_prompt=Prompts.research_template
             )
+            
             refined_query = state['messages'][-1].content if state['messages'] else ""
+            if not refined_query:
+                logging.warning("No refined query found in state messages")
+                return {
+                    "research_response": "Error: No query provided for research"
+                }
+            
             response = await agent.ainvoke({
-                "messages": [{"role": "user", "content": refined_query}]
+                "messages": [HumanMessage(content=refined_query)]
             })
+            
+            # Extract the content from the response properly
+            response_content = ""
+            if hasattr(response, 'content'):
+                response_content = response.content
+            elif 'messages' in response and response['messages']:
+                last_message = response['messages'][-1]
+                if hasattr(last_message, 'content'):
+                    response_content = last_message.content
+                else:
+                    response_content = str(last_message)
+            else:
+                response_content = str(response)
+            
             return {
-                "research_response": response.content
+                "research_response": response_content
             }
-        except CustomException as e:
-            logging.error(f" Error in Research Agent: {e}")
+            
+        except Exception as e:
+            logging.error(f"Error in Research Agent: {e}")
             raise CustomException(e, sys) from e
-        

@@ -12,37 +12,56 @@ from src.ai_component.logger import logging
 mcp = FastMCP("WebSearch")
 
 @mcp.tool()
-async def web_search(query: str)-> str:
-    """Tool for web search on the given topics """
+async def web_search(query: str) -> str:
+    """Tool for web search on the given topics"""
     if not Config.serper_api_key:
         logging.warning("Serper Api Key not configured")
         return "Error: serper api key not configured correctly"
     try:
-        logging.info('Performing Serper api web search')
-        params = {
-            "q": query,
-            "api_key": Config.serper_api_key,
-            "source": "python"
+        logging.info(f'Performing Serper API web search for: {query}')
+        
+        headers = {
+            'X-API-KEY': Config.serper_api_key,
+            'Content-Type': 'application/json'
         }
+        
+        payload = {
+            'q': query,
+            'num': 5  
+        }
+        
         async with httpx.AsyncClient() as client:
-            response = await client.get("https://serpapi.com/search", params= params)
+            response = await client.post(
+                "https://google.serper.dev/search", 
+                json=payload, 
+                headers=headers
+            )
             response.raise_for_status()
             result = response.json()
-
-        ## extracting top results
-        if "answer_box" in result and "snippet" in result['answer_box']:
-            return f"Result from Web Search : {result['answer_box']['snippet']}"
-        elif "organic_results" in result and result['organic_results']:
-            top_result = result['organic_results'][0]
-            return f"Top search result : {top_result.get('snippet', 'No snippet available.')} (Source: {top_result.get('link')})"
-        else:
-            return "No direct result found for the topic"
+        formatted_results = []
         
-    except CustomException as e:
-        logging.error(f"Error in Mcp web search : {e}")
+        # Check for answer box (direct answer)
+        if "answerBox" in result:
+            answer_box = result["answerBox"]
+            if "answer" in answer_box:
+                formatted_results.append(f"Direct Answer: {answer_box['answer']}")
+            elif "snippet" in answer_box:
+                formatted_results.append(f"Featured Snippet: {answer_box['snippet']}")
+        
+        # Get organic results
+        if "organic" in result and result["organic"]:
+            formatted_results.append("\nTop Search Results:")
+            for i, item in enumerate(result["organic"][:3], 1):  # Top 3 results
+                title = item.get("title", "No title")
+                snippet = item.get("snippet", "No snippet available")
+                link = item.get("link", "No link")
+                formatted_results.append(f"{i}. {title}\n   {snippet}\n   Source: {link}\n")
+        
+        if formatted_results:
+            return "\n".join(formatted_results)
+        else:
+            return "No results found for the given query."
+        
+    except Exception as e:
+        logging.error(f"Error in MCP web search: {e}")
         raise CustomException(e, sys) from e
-    
-
-if __name__ == "__main__":
-    logging.info("Web Searching Started")
-    mcp.run(transport="stdio")
