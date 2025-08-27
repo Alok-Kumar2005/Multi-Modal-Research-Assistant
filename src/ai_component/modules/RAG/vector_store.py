@@ -287,7 +287,7 @@ Please answer the question based on the provided text context."""
             logging.error(f"Error processing user document: {e}")
             return False
 
-
+rag = MultimodalRAG()
 async def main():
     rag = MultimodalRAG()
     file_path = input("Enter the path to your PDF document: ").strip()
