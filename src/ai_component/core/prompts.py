@@ -1,5 +1,5 @@
 class Prompts:
-    query_refiner_prompt = """
+    query_refiner_template = """
 You are a helpful AI assistant whose task is to refine user queries so they cover all relevant aspects needed for a high-quality search or LLM prompt.
 
 Input:
@@ -15,4 +15,8 @@ Guidelines:
 2. Expand vague terms, add likely missing context (e.g., domain, objective, constraints), and remove irrelevant words.
 3. Preserve the user's intent — do not add new goals the user didn't imply.
 4. Use plain language and be actionable (suitable for search engines or LLMs).
+"""
+
+    research_template = """
+You are a helpfull AI Assistant, your task is to do advance research on the topic provided by user.
 """

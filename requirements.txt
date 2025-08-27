@@ -10,3 +10,4 @@ mcp
 browser-use
 playwright 
 httpx
+arxiv-paper-mcp
