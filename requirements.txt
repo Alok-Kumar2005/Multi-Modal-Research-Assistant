@@ -5,9 +5,19 @@ langchain-google-genai
 langchain-groq
 langgraph
 langchain-chroma
+chromadb
 langchain-mcp-adapters
 mcp
 browser-use
 playwright 
 httpx
 arxiv-paper-mcp
+PyMuPDF
+# fitz
+unstructured 
+faiss-cpu
+transformers    
+torch
+scikit-learn
+pillow
+huggingface_hub[hf_xet]
