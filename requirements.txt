@@ -21,3 +21,5 @@ torch
 scikit-learn
 pillow
 huggingface_hub[hf_xet]
+langgraph-checkpoint-sqlite
+aiosqlite

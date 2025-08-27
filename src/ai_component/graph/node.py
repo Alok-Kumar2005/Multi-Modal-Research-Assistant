@@ -136,31 +136,31 @@ class Nodes:
             raise CustomException(e, sys) from e
     
     ## node with tool call
-    @staticmethod
-    async def VectorNode2(state: AssistantState)->dict:
-        """Get the relavent data from the vector database"""
-        logging.info("Vector Node...............")
-        try:
-            query = state['messages'][-1].content if state['messages'] else ""
-            prompt = PromptTemplate(
-                input_variables= = ['user_query'],
-                template= Prompts.vector_search_template
-            )
-            factory = LLMChainFactory(model_type= "gemini")
-            chain = await factory.get_llm_tool_chain(
-                prompt= prompt,
-                tools= [rag_tool]
-            )
-            response = await chain.ainvoke({
-                "user_query": query
-            })
+    # @staticmethod
+    # async def VectorNode2(state: AssistantState)->dict:
+    #     """Get the relavent data from the vector database"""
+    #     logging.info("Vector Node...............")
+    #     try:
+    #         query = state['messages'][-1].content if state['messages'] else ""
+    #         prompt = PromptTemplate(
+    #             input_variables= = ['user_query'],
+    #             template= Prompts.vector_search_template
+    #         )
+    #         factory = LLMChainFactory(model_type= "gemini")
+    #         chain = await factory.get_llm_tool_chain(
+    #             prompt= prompt,
+    #             tools= [rag_tool]
+    #         )
+    #         response = await chain.ainvoke({
+    #             "user_query": query
+    #         })
 
-            return {
-                "vector_response": response.content
-            }
-        except CustomException as e:
-            logging.error(f"Error in Vector Node: {e}")
-            raise CustomException(e, sys) from e
+    #         return {
+    #             "vector_response": response.content
+    #         }
+    #     except CustomException as e:
+    #         logging.error(f"Error in Vector Node: {e}")
+    #         raise CustomException(e, sys) from e
         
 
     async def CombinedNode(state: AssistantState)->dict:
