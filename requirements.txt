@@ -5,3 +5,5 @@ langchain-google-genai
 langchain-groq
 langgraph
 langchain-chroma
+langchain-mcp-adapters
+mcp

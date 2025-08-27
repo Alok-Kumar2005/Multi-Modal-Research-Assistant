@@ -11,5 +11,7 @@ dependencies = [
     "langchain-core>=0.3.74",
     "langchain-google-genai>=2.1.9",
     "langchain-groq>=0.3.7",
+    "langchain-mcp-adapters>=0.1.9",
     "langgraph>=0.6.6",
+    "mcp>=1.13.1",
 ]

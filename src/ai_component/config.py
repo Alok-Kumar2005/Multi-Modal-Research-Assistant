@@ -20,3 +20,5 @@ class Config:
         "max_tokens": 512
     }
     groq_api_key = os.getenv("GROQ_API_KEY")
+
+    serper_api_key = os.getenv("SERPER_API_KEY")
