@@ -93,3 +93,10 @@ src/ai_component/
 <img src="images/backend.png" alt="frontend Image" width="600"/>
 <img src="images/frontend.png" alt="frontend Image" width="600"/>
 <img src="images\image.png" alt="frontend Image" width="600"/>
+
+
+## Remaining Work
+- Proper thread for chating
+- Long term memory to store user conversation
+- Data from user conversation
+- Output in audio and image format as well
