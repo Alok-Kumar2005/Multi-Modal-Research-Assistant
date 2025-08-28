@@ -72,14 +72,14 @@ Instruction:
 
 Refined Response:
 """
-   combined_template = """
-You are a helpful AI Assistant 
 
-You have the user query and responses from the vector store and tools reponse
-- Your task is to on the basis of user query and response create a best response
-- Response should cover all the aspects of asnwer
+    combined_template = """
+You are a helpful AI Assistant.
+You have the user query and responses from the vector store and tools response.
+- Your task is to, on the basis of user query and responses, create the best possible final response.
+- The response should cover all aspects of the answer.
 
 User query: {query}
-vector response: {vector_respo}
-tools response : {research_respo}
+Vector response: {vector_respo}
+Tools response: {research_respo}
 """

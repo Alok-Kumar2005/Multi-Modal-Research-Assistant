@@ -5,11 +5,13 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "aiofiles>=24.1.0",
     "aiosqlite>=0.21.0",
     "arxiv-paper-mcp>=0.1.2",
     "browser-use>=0.7.0",
     "chromadb>=1.0.20",
     "faiss-cpu>=1.12.0",
+    "fastapi>=0.116.1",
     "fitz>=0.0.1.dev2",
     "httpx>=0.28.1",
     "huggingface-hub[hf-xet]>=0.34.4",
@@ -25,10 +27,13 @@ dependencies = [
     "mcp>=1.13.1",
     "pillow>=11.3.0",
     "playwright>=1.54.0",
+    "pydantic>=2.11.7",
     "pymupdf>=1.25.3",
     "rank-bm25>=0.2.2",
     "scikit-learn>=1.7.1",
+    "streamlit>=1.49.0",
     "torch>=2.8.0",
     "transformers>=4.55.4",
     "unstructured>=0.18.14",
+    "uvicorn>=0.35.0",
 ]

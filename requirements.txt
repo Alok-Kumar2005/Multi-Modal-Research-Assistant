@@ -23,3 +23,8 @@ pillow
 huggingface_hub[hf_xet]
 langgraph-checkpoint-sqlite
 aiosqlite
+fastapi
+uvicorn
+streamlit
+pydantic
+aiofiles

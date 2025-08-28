@@ -5,6 +5,7 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', '..'))
 import asyncio
 import aiosqlite
 from functools import lru_cache
+from langchain_core.messages import HumanMessage
 from langgraph.graph import END, START, StateGraph
 from langgraph.prebuilt import ToolNode, tools_condition
 from langgraph.checkpoint.sqlite.aio import AsyncSqliteSaver
@@ -45,3 +46,36 @@ async def create_workflow():
     graph_builder.add_edge("combined_node", END)
 
     return graph_builder.compile(checkpointer= async_saver)
+
+async def test_workflow():
+    """Test the complete workflow"""
+    print("\nTesting Complete Workflow...")
+    
+    try:
+        workflow = await create_workflow()
+        test_query = "Tell me about artificial intelligence"
+        print(f"Testing query: {test_query}")
+        config = {"configurable": {"thread_id": "test_thread"}}
+        
+        result = await workflow.ainvoke(
+            {"messages": [HumanMessage(content=test_query)]},
+            config=config
+        )
+        
+        print("Workflow completed successfully!")
+        print(f"Final response: {result['messages'][-1].content}")
+        
+        return True
+        
+    except Exception as e:
+        print(f"Error testing workflow: {e}")
+        return False
+    
+async def main():
+    workflow_success = await test_workflow()
+    if not workflow_success:
+        print("Workflow test failed. Please check logs.")
+        return
+
+if __name__ == "__main__":
+    asyncio.run(main())

@@ -63,7 +63,8 @@ class Nodes:
                             "--with",
                             "arxiv-paper-mcp>=0.1.0",
                             "arxiv-mcp"
-                        ]
+                        ],
+                        "transport": "stdio"
                     },
                     "WebSearch": {
                         "command": "python",
@@ -92,7 +93,7 @@ class Nodes:
             if not refined_query:
                 logging.warning("No refined query found in state messages")
                 return {
-                    "research_response": "Error: No query provided for research"
+                    "research_response": ["Error: No query provided for research"]
                 }
             
             response = await agent.ainvoke({
@@ -113,12 +114,14 @@ class Nodes:
                 response_content = str(response)
             
             return {
-                "research_response": response_content
+                "research_response": [response_content]  
             }
             
         except Exception as e:
             logging.error(f"Error in Research Agent: {e}")
-            raise CustomException(e, sys) from e
+            return {
+                "research_response": [f"Error in research: {str(e)}"] 
+            }
         
 
     async def VectorNode(state: AssistantState)->dict:
@@ -129,7 +132,7 @@ class Nodes:
             response = await rag.query_document(query=query)
 
             return {
-                "vector_response": response.content
+                "vector_response": response
             }
         except CustomException as e:
             logging.error(f"Error in Vector Node: {e}")
@@ -163,30 +166,35 @@ class Nodes:
     #         raise CustomException(e, sys) from e
         
 
-    async def CombinedNode(state: AssistantState)->dict:
+    @staticmethod
+    async def CombinedNode(state: AssistantState) -> dict:
         """Give a better result from the combination of the vector data and tool data"""
         logging.info("Combined Node................")
         try:
             query = state['messages'][-1].content if state['messages'] else ""
-            vector_resp = state['vector_response'][-1] if state['vector_response'] else ""
-            tool_repo = state["research_response"][-1] if state['research_response'] else ""
+            vector_resp = state.get('vector_response', [""])
+            vector_resp = vector_resp[-1] if vector_resp else ""
+            
+            research_resp = state.get("research_response", [""])
+            research_resp = research_resp[-1] if research_resp else ""
 
             prompt = PromptTemplate(
-                input_variables= ['query', "vector_respo", "research_respo"],
-                template= Prompts.combined_template
+                input_variables=['query', "vector_respo", "research_respo"],
+                template=Prompts.combined_template
             )
-            factory = LLMChainFactory(model_type= "gemini")
-            chain = await factory.get_llm_chain_async(prompt= prompt)
+            factory = LLMChainFactory(model_type="gemini")
+            chain = await factory.get_llm_chain_async(prompt=prompt)
             response = await chain.ainvoke({
                 "query": query,
                 "vector_respo": vector_resp,
-                "research_respo": tool_repo
+                "research_respo": research_resp
             })
 
             return {
-                "messages": [AIMessage(content= response.content)]
+                "messages": [AIMessage(content=response.content)]
             }
-        except CustomException as e:
-            logging.error(f"Error in combdined node: {e}")
-            raise CustomException(e, sys) from e
-        
+        except Exception as e:
+            logging.error(f"Error in combined node: {e}")
+            return {
+                "messages": [AIMessage(content=f"Error in combining responses: {str(e)}")]
+            }
