@@ -9,7 +9,7 @@ from src.ai_component.config import Config
 
 class AudioTranscriber:
     def __init__(self ):
-        self.settings.api_key = Config.assemblyai_api_key
+        aai.settings.api_key = Config.assemblyai_api_key
         self.config = aai.TranscriptionConfig(
             speech_model =  aai.SpeechModel.best,
             language_detection = True,
